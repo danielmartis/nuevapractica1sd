@@ -1,0 +1,5 @@
+serialVersionUID=1
+RMIName=Sonda1
+registerServices=Proxy[RegisterServices,RemoteObjectInvocationHandler[UnicastRef [liveRef: [endpoint:[192.168.0.104:39138](remote),objID:[7f1d0c74:17313603743:-7fff, -7331126844108237881]]]]]
+registry=RegistryImpl_Stub[UnicastRef [liveRef: [endpoint:[192.168.0.104:8002](remote),objID:[0:0:0, 0]]]]
+sensor=Sensor{RMIName='Sonda1', Volumen=50, Led=20, UltimaFecha='03/07/2020 08:54:25'}
