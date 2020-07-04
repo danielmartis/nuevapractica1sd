@@ -1,7 +1,9 @@
-package Controller;
+package Parking.Controller;
 
-import MyHTTPServer.SocketUtils;
-import Sensor.SensorServices;
+import Parking.MyHTTPServer.MyHTTPSettings;
+import Parking.MyHTTPServer.SocketUtils;
+import Parking.Sensor.SensorServices;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -17,14 +19,12 @@ import java.rmi.registry.Registry;
  */
 class ControllerThread extends Thread {
     private final Socket requestSocket;
-    private final String ipRMI;
-    private final int pRMI;
+    private final MyHTTPSettings settings;
     private Registry registry;
 
-    ControllerThread(String ip,int port, Socket requestSocket) {
+    ControllerThread(MyHTTPSettings settings, Socket requestSocket) {
         this.requestSocket = requestSocket;
-        this.ipRMI = ip;
-        this.pRMI = port;
+        this.settings = settings;
     }
 
     /**
@@ -39,7 +39,7 @@ class ControllerThread extends Thread {
     public void run() {
         try {
             String response;
-            registry = LocateRegistry.getRegistry(ipRMI, pRMI);
+            registry = LocateRegistry.getRegistry(settings.REGISTRY_IP, settings.REGISTRY_PORT);
             String query = SocketUtils.receiveMessage(requestSocket).replaceAll("\\n", "");
             System.out.println("query = " + query);
             if (query.equals("")) response = sendAvailableSensors();
@@ -56,21 +56,23 @@ class ControllerThread extends Thread {
      * @param query the given query
      * @return the query's response info
      */
-    
+    @Nullable
     private String processQuery(String query) {
         StringBuilder response = new StringBuilder();
         String[] queryParts = query.split("\\?");
-        System.out.println("Query parts: " + queryParts.length);
-	for(String query2: queryParts)
-		System.out.println("Query2: " +query2);
         if (queryParts.length == 2) {
             String resource = queryParts[0];
-            String[] parameters = queryParts[1].split("=");
-            System.out.println("Parameters parts: " + parameters.length);
-            //String[] parameterParts = parameter.split("=");
-            String key = parameters[0];
-	    System.out.println("Key: " + key);
-            response.append("<p>[").append(key).append(",").append(resource).append("] = ").append(getSensorProperty(resource, key)).append("</p>\n");
+            String[] parameters = queryParts[1].split("&");
+            for (String parameter : parameters) {
+                String[] parameterParts = parameter.split("=");
+                if (parameterParts.length == 2) {
+                    String key = parameterParts[0];
+                    String value = parameterParts[1];
+                    if (key.equals(settings.SENSOR_KEYWORD))
+                        response.append("<p>[").append(value).append(",").append(resource).append("] = ")
+                                .append(getSensorProperty(value, resource)).append("</p>\n");
+                }
+            }
             response.append("<a href=\"../\">Inicio</a>");
             return response.toString();
         }
@@ -83,15 +85,14 @@ class ControllerThread extends Thread {
      * @param resource property's name (used as the reflective method call). If it's a setter, sepparates the resource's name and its value
      * @return the property's value
      */
+    @Nullable
     private String getSensorProperty(String sensorName, String resource) {
         try {
-            System.out.println("Hola");
             Object returnedValue, remoteObject = registry.lookup(sensorName);
             if (remoteObject instanceof SensorServices) {
                 SensorServices sensor = (SensorServices) remoteObject;
                 if (resource.contains("=")) {
                     String[] resourceParts = resource.split("=");
-                    System.out.println(resourceParts);
                     int param;
                     try {
                         param = Math.max(0, Integer.parseInt(resourceParts[1]));
@@ -117,7 +118,7 @@ class ControllerThread extends Thread {
      * Looks for the registered sensors and returns them as a list
      * @return the available sensors
      */
-    
+    @Nullable
     private String sendAvailableSensors() {
         try {
             StringBuilder names = new StringBuilder();
