@@ -1,9 +1,7 @@
-package Parking.Controller;
+package Controller;
 
-import Parking.MyHTTPServer.MyHTTPSettings;
-import Parking.MyHTTPServer.SocketUtils;
-import Parking.Sensor.SensorServices;
-import org.jetbrains.annotations.Nullable;
+import MyHTTPServer.SocketUtils;
+import Sensor.SensorServices;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -12,19 +10,21 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-
+import java.util.StringTokenizer;
 /**
  * Created by pavel on 23/10/16.
  * Implements Controller's logic
  */
 class ControllerThread extends Thread {
     private final Socket requestSocket;
-    private final MyHTTPSettings settings;
+    private final String ipRMI;
+    private final int pRMI;
     private Registry registry;
 
-    ControllerThread(MyHTTPSettings settings, Socket requestSocket) {
+    ControllerThread(String ip,int port, Socket requestSocket) {
         this.requestSocket = requestSocket;
-        this.settings = settings;
+        this.ipRMI = ip;
+        this.pRMI = port;
     }
 
     /**
@@ -39,7 +39,7 @@ class ControllerThread extends Thread {
     public void run() {
         try {
             String response;
-            registry = LocateRegistry.getRegistry(settings.REGISTRY_IP, settings.REGISTRY_PORT);
+            registry = LocateRegistry.getRegistry(ipRMI, pRMI);
             String query = SocketUtils.receiveMessage(requestSocket).replaceAll("\\n", "");
             System.out.println("query = " + query);
             if (query.equals("")) response = sendAvailableSensors();
@@ -56,27 +56,46 @@ class ControllerThread extends Thread {
      * @param query the given query
      * @return the query's response info
      */
-    @Nullable
+    
     private String processQuery(String query) {
-        StringBuilder response = new StringBuilder();
+        /*StringBuilder response = new StringBuilder();
         String[] queryParts = query.split("\\?");
+        System.out.println("Query parts: " + queryParts.length);
+	for(String query2: queryParts)
+		System.out.println("Query2: " +query2);
         if (queryParts.length == 2) {
             String resource = queryParts[0];
-            String[] parameters = queryParts[1].split("&");
-            for (String parameter : parameters) {
-                String[] parameterParts = parameter.split("=");
-                if (parameterParts.length == 2) {
-                    String key = parameterParts[0];
-                    String value = parameterParts[1];
-                    if (key.equals(settings.SENSOR_KEYWORD))
-                        response.append("<p>[").append(value).append(",").append(resource).append("] = ")
-                                .append(getSensorProperty(value, resource)).append("</p>\n");
-                }
-            }
+            String[] parameters = queryParts[1].split("=");
+            System.out.println("Parameters parts: " + parameters.length);
+            //String[] parameterParts = parameter.split("=");
+            String key = parameters[0];
+	    System.out.println("Key: " + key);
+            response.append("<p>[").append(key).append(",").append(resource).append("] = ").append(getSensorProperty(resource, key)).append("</p>\n");
             response.append("<a href=\"../\">Inicio</a>");
             return response.toString();
         }
-        return null;
+        return null;*/
+        StringBuilder response = new StringBuilder();
+        String element = "",aux1 = "",objeto="",valorSet="",objetoMostrar="";
+        try {
+            StringTokenizer s = new StringTokenizer(query,"?");
+            element = s.nextToken();
+            objeto = s.nextToken();
+            System.out.println(element + " " + objeto);
+            if(objeto.contains("&")){
+                s = new StringTokenizer(objeto,"&");
+                objetoMostrar = s.nextToken();
+            }
+            else
+                objetoMostrar=objeto;
+            //System.out.println(objetoMostrar);
+            response.append("<p>[").append(objeto).append(",").append(element).append("] = ").append(getSensorProperty(objeto, element)).append("</p>\n");
+        }catch(Exception e){
+            System.out.println("Error en query: " + e);
+        }
+        response.append("<a href=\"../\">Inicio</a>");
+        return response.toString();
+        
     }
 
     /**
@@ -85,14 +104,26 @@ class ControllerThread extends Thread {
      * @param resource property's name (used as the reflective method call). If it's a setter, sepparates the resource's name and its value
      * @return the property's value
      */
-    @Nullable
     private String getSensorProperty(String sensorName, String resource) {
         try {
+            String aux1="";
+            //System.out.println(resource);
+            if(sensorName.contains("&")){
+                StringTokenizer s = new StringTokenizer(sensorName,"&");
+                sensorName = s.nextToken();
+                aux1 = s.nextToken();
+            }
+            //System.out.println(sensorName);
+            
+            //System.out.println(aux1);
             Object returnedValue, remoteObject = registry.lookup(sensorName);
             if (remoteObject instanceof SensorServices) {
                 SensorServices sensor = (SensorServices) remoteObject;
-                if (resource.contains("=")) {
-                    String[] resourceParts = resource.split("=");
+                System.out.println(aux1);
+                if (aux1.contains("=")) {
+                    String[] resourceParts = aux1.split("=");
+                    //System.out.println("Tengo un =");
+                    //System.out.println(resourceParts[1]);
                     int param;
                     try {
                         param = Math.max(0, Integer.parseInt(resourceParts[1]));
@@ -118,7 +149,7 @@ class ControllerThread extends Thread {
      * Looks for the registered sensors and returns them as a list
      * @return the available sensors
      */
-    @Nullable
+    
     private String sendAvailableSensors() {
         try {
             StringBuilder names = new StringBuilder();
