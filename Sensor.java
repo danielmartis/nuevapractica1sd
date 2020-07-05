@@ -24,7 +24,7 @@ import java.time.format.DateTimeFormatter;
  */
 public class Sensor extends UnicastRemoteObject implements SensorServices {
     private static final long serialVersionUID = 1L;
-    private final String RMIName;
+    private static String RMIName;
     private static RegisterServices registerServices;
     private static Registry registry;
     private static Sensor sensor;
@@ -54,7 +54,7 @@ public class Sensor extends UnicastRemoteObject implements SensorServices {
     }
 
     @Override
-    public String fecha() throws RemoteException {
+    public String ultimafecha() throws RemoteException {
         try {
             readFile(RMIName + ".txt");
         } catch (IOException | IllegalAccessException | NoSuchFieldException e) {
@@ -64,7 +64,7 @@ public class Sensor extends UnicastRemoteObject implements SensorServices {
     }
 
     @Override
-    public String ultimafecha() throws RemoteException {
+    public String fecha() throws RemoteException {
         UltimaFecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
         saveFile();
         return UltimaFecha;
@@ -102,9 +102,8 @@ public class Sensor extends UnicastRemoteObject implements SensorServices {
 
     private void saveFile() {
         try (BufferedWriter bw = Files.newBufferedWriter(Paths.get(RMIName + ".txt"))) {
-            for (Field f : this.getClass().getDeclaredFields())
-                if (!Modifier.isPublic(f.getModifiers())) bw.write(f.getName() + "=" + f.get(this) + System.lineSeparator());
-        } catch (IOException | IllegalAccessException e) {
+            bw.write("Volumen="+Volumen+"\nUltimaFecha="+UltimaFecha+"\nLed="+Led);
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -114,8 +113,8 @@ public class Sensor extends UnicastRemoteObject implements SensorServices {
         return "Sensor{" +
                 "RMIName='" + RMIName + '\'' +
                 ", Volumen=" + Volumen +
-                ", Led=" + Led +
-                ", UltimaFecha='" + UltimaFecha + '\'' +
+                ", UltimaFecha=" + UltimaFecha +
+                ", Led='" + Led + '\'' +
                 '}';
     }
 
@@ -123,9 +122,12 @@ public class Sensor extends UnicastRemoteObject implements SensorServices {
         if (args.length >= 3) {
             registry = LocateRegistry.getRegistry(args[0], Integer.parseInt(args[1]));
             try {
+
                 System.out.println("Before reading");
                 sensor = new Sensor(args[2]);
                 System.out.println("Binding " + sensor.getRMIName() + " through " + args[0] + ":" + args[1]);
+		System.out.println(Register.RMI_NAME);
+
                 registerServices = (RegisterServices) registry.lookup(Register.RMI_NAME);
                 registerServices.registerSensor(sensor);
                 System.out.print("Press ENTER to disconnect ");
@@ -135,7 +137,7 @@ public class Sensor extends UnicastRemoteObject implements SensorServices {
                 System.out.println("Success");
                 System.exit(0);
             } catch (IOException e) {
-                System.err.println("Error reading file");
+                System.err.println("Error reading file: " + e);
             }
         } else System.out.println("Wrong args: <IP> <PORT> <FILENAME>");
         System.exit(0);
