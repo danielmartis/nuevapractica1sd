@@ -11,10 +11,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.StringTokenizer;
-/**
- * Created by pavel on 23/10/16.
- * Implements Controller's logic
- */
+
 class ControllerThread extends Thread {
     private final Socket requestSocket;
     private final String ipRMI;
@@ -81,15 +78,16 @@ class ControllerThread extends Thread {
             StringTokenizer s = new StringTokenizer(query,"?");
             element = s.nextToken();
             objeto = s.nextToken();
-            System.out.println(element + " " + objeto);
+            //System.out.println(element + " " + objeto);
             if(objeto.contains("&")){
+                System.out.println("Hola");
                 s = new StringTokenizer(objeto,"&");
                 objetoMostrar = s.nextToken();
             }
             else
                 objetoMostrar=objeto;
             //System.out.println(objetoMostrar);
-            response.append("<p>[").append(objeto).append(",").append(element).append("] = ").append(getSensorProperty(objeto, element)).append("</p>\n");
+            response.append("<p>[").append(objetoMostrar).append(",").append(element).append("] = ").append(getSensorProperty(objeto, element)).append("</p>\n");
         }catch(Exception e){
             System.out.println("Error en query: " + e);
         }
@@ -113,9 +111,8 @@ class ControllerThread extends Thread {
                 sensorName = s.nextToken();
                 aux1 = s.nextToken();
             }
-            //System.out.println(sensorName);
-            
-            //System.out.println(aux1);
+            System.out.println("Sensor: " + sensorName);
+            System.out.println("Recurso: " + resource);
             Object returnedValue, remoteObject = registry.lookup(sensorName);
             if (remoteObject instanceof SensorServices) {
                 SensorServices sensor = (SensorServices) remoteObject;
@@ -128,7 +125,8 @@ class ControllerThread extends Thread {
                     try {
                         param = Math.max(0, Integer.parseInt(resourceParts[1]));
                     } catch (NumberFormatException e) { param = 0; }
-                    sensor.getClass().getMethod(resourceParts[0], int.class).invoke(sensor, param);
+                    
+                    sensor.getClass().getMethod(resource, int.class).invoke(sensor, param);
                     returnedValue = param;
                 } else returnedValue = sensor.getClass().getMethod(resource).invoke(sensor);
                 return returnedValue.toString();
@@ -144,6 +142,7 @@ class ControllerThread extends Thread {
         }
         return null;
     }
+
 
     /**
      * Looks for the registered sensors and returns them as a list
