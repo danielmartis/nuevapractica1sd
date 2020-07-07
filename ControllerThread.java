@@ -134,6 +134,7 @@ class ControllerThread extends Thread {
             names.append("<p>Lista de nombres de sensores disponibles:</p>\n");
             for (String remoteName : registry.list())
                 if(registry.lookup(remoteName) instanceof SensorServices) names.append("<p>").append(remoteName).append("</p>\n");
+	    names.append("<p>Los links tienen el siguiente patron: IP:puerto/controladorSD/metodo?NombreSonda en todos los casos menos al cambiar la luz que sigue el patron IP:puerto/controladorSD/setluz?NombreSonda&valor=nuevoValor </p>\n");
             names.append("<p><a href=\"../\">Inicio</a></p>\n");
             return names.toString();
         } catch (RemoteException | NotBoundException e) {
