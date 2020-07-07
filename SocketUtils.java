@@ -10,10 +10,6 @@ import java.net.*;
 import java.util.Collections;
 import java.util.Enumeration;
 
-/**
- * Created by pavel on 13/09/16.
- * Funciones comunes para que las demás clases puedan usarlas
- */
 public class SocketUtils {
     /**
      * Send message through a socket byte-per-byte

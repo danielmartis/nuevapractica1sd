@@ -18,10 +18,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-/**
- * Created by pavel on 21/10/16.
- * Sensor's implementation
- */
+
 public class Sensor extends UnicastRemoteObject implements SensorServices {
     private static final long serialVersionUID = 1L;
     private static String RMIName;
@@ -50,6 +47,7 @@ public class Sensor extends UnicastRemoteObject implements SensorServices {
         } catch (IOException | IllegalAccessException | NoSuchFieldException e) {
             e.printStackTrace();
         }
+	
         return Volumen;
     }
 

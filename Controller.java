@@ -8,10 +8,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.*;
 import java.net.*;
-/**
- * Created by pavel on 17/10/16.
- * Intermediate between MyHTTPServer and RMI Register
- */
+
 class Controller {
     public static void main(String args[]) {
         String ipRMI,ipController;

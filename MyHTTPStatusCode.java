@@ -5,11 +5,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-/**
- * This enumeration contains some HTTP Status Codes with its description
- * Very useful to access them from the server's logic if you want to send any kind of response
- * Created by pavel on 3/10/16.
- */
 enum MyHTTPStatusCode {
     OK (200, "OK"),
     NOT_FOUND (404, "Not Found"),

@@ -24,14 +24,7 @@ class ControllerThread extends Thread {
         this.pRMI = port;
     }
 
-    /**
-     * Controller's main logic. Receives a query and processes a response:
-     * <ol>
-     *     <li>If there is no query, it will show all Available Sensors</li>
-     *     <li>If not, it will process the query</li>
-     * </ol>
-     * It also connects to the RMI Register
-     */
+    
     @Override
     public void run() {
         try {
@@ -48,12 +41,7 @@ class ControllerThread extends Thread {
         }
     }
 
-    /**
-     * Sepparates the sensor's name and the resource and asks for it
-     * @param query the given query
-     * @return the query's response info
-     */
-    
+
     private String processQuery(String query) {
         /*StringBuilder response = new StringBuilder();
         String[] queryParts = query.split("\\?");
@@ -96,12 +84,6 @@ class ControllerThread extends Thread {
         
     }
 
-    /**
-     * Looks for a sensor property, invokes it's method with reflexion and returns its value
-     * @param sensorName registered sensor's name
-     * @param resource property's name (used as the reflective method call). If it's a setter, sepparates the resource's name and its value
-     * @return the property's value
-     */
     private String getSensorProperty(String sensorName, String resource) {
         try {
             String aux1="";
@@ -144,10 +126,7 @@ class ControllerThread extends Thread {
     }
 
 
-    /**
-     * Looks for the registered sensors and returns them as a list
-     * @return the available sensors
-     */
+ 
     
     private String sendAvailableSensors() {
         try {

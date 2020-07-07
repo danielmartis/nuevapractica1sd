@@ -22,15 +22,6 @@ class MyHTTPThread extends Thread {
         this.pControl = puerto;
     }
 
-    /**
-     * MyHTTP-Server's main logic. Receives an HTTP Petition and processes it:
-     * <ol>
-     *     <li>Checks if HTTP Method is GET. Otherwise, returns HTTP 405 Method Not Allowed error</li>
-     *     <li>Checks wich kind of content requested the HTTP (index.html by default)</li>
-     *     <li>If content is dynamic, serve dynamic content passing its query</li>
-     *     <li>If content is static, serve requested file passing its filename</li>
-     * </ol>
-     */
     @Override
     public void run() {
         try {
@@ -54,12 +45,7 @@ class MyHTTPThread extends Thread {
         }
     }
 
-    /**
-     * Connects to the controller, sends him the query, receives its response and sends it to the HTTP Client.
-     * If the controller sends a null response, an HTTP 409 Conflict error is sent.
-     * @param query the query to send
-     * @throws IOException if the HTTP socket is broken. If the Controller's socket is the broken one, an HTTP 409 Conflict error is sent
-     */
+  
     private void serveDynamicRequest(String query) throws IOException {
         try {
             Socket s = new Socket(ipControl, pControl);
@@ -73,11 +59,7 @@ class MyHTTPThread extends Thread {
         }
     }
 
-    /**
-     * Opens a file, applies to him the HTML escape characters and calls the sendHTTPResponse method
-     * @param path the requested file's path
-     * @throws IOException if the socket is borken. If the file is not found, an HTTP 404 Not Found error is sent
-     */
+
     private void serveStaticRequest(String path) throws IOException {
         try {
             sendHTTPResponse(HTMLEntityEncode(new String(Files.readAllBytes(Paths.get(path)))) + "\n", MyHTTPStatusCode.OK);
@@ -89,12 +71,7 @@ class MyHTTPThread extends Thread {
         }
     }
 
-    /**
-     * Sends a generic HTTP Response
-     * @param fileContent Content to send
-     * @param statusCode HTTP Code wich was processed
-     * @throws IOException if the socket is broken.
-     */
+
     private void sendHTTPResponse(String fileContent, MyHTTPStatusCode statusCode) throws IOException {
         String response = "HTTP/1.1 " + statusCode.getCode() + " " + statusCode.getDescription() + "\n" +
                 "Connection: close\n" +
@@ -106,11 +83,7 @@ class MyHTTPThread extends Thread {
         sendMessage(requestSocket, response);
     }
 
-    /**
-     * Encodes a String to its HTML special characters
-     * @param s the given String
-     * @return
-     */
+ 
     static String HTMLEntityEncode(String s) {
         StringBuilder builder = new StringBuilder ();
         for (char c : s.toCharArray()) builder.append((int)c < 128 ? c : "&#" + (int) c + ";");

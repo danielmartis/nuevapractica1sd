@@ -28,11 +28,7 @@ class MyHTTPServer {
         }
     }
 
-    /**
-     * Initializes the HTTP Server with the readen config and serves connections to a web browser.
-     * It also controls the amount of simultaneous connections by counting the number of threads that the main process has launched
-     * @param settings the readen settings
-     */
+  
     private static void init(String ipServer, int pServer, String ipControl, int pControl, int conex) {
         try {
             ServerSocket serverSocket = new ServerSocket();

@@ -3,10 +3,7 @@ package Registry;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-/**
- * Created by pavel on 17/10/16.
- * General RMI Interface
- */
+
 public interface RMIServices extends Remote {
     int volumen() throws RemoteException;
     String fecha() throws RemoteException;

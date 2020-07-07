@@ -9,10 +9,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
-/**
- * Created by pavel on 21/10/16.
- * Register's implementation
- */
+
 public class Register extends UnicastRemoteObject implements RegisterServices {
 
     private static final long serialVersionUID = 1L;
