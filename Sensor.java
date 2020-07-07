@@ -44,6 +44,7 @@ public class Sensor extends UnicastRemoteObject implements SensorServices {
     public int volumen() throws RemoteException {
         try {
             readFile(RMIName + ".txt");
+	    
         } catch (IOException | IllegalAccessException | NoSuchFieldException e) {
             e.printStackTrace();
         }
@@ -81,6 +82,7 @@ public class Sensor extends UnicastRemoteObject implements SensorServices {
     @Override
     public void setluz(int value) throws RemoteException {
         Led = value;
+	UltimaFecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
         saveFile();
     }
 
